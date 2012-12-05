@@ -171,16 +171,16 @@ public class IfRole {
     private Collection<GrantedAuthority> retainAll(final Collection<GrantedAuthority> granted, final Collection<GrantedAuthority> required) {
     	Collection<GrantedAuthority> grantedRoles = authoritiesToRoles(granted);
     	Collection<GrantedAuthority> requiredRoles = authoritiesToRoles(required);
-    	ArrayList<GrantedAuthority> union = new ArrayList<GrantedAuthority>();
+    	ArrayList<GrantedAuthority> intersection = new ArrayList<GrantedAuthority>();
     	for (GrantedAuthority requiredAuthory : requiredRoles) {
 			if(grantedRoles.contains(requiredAuthory)){
-				union.add(requiredAuthory);
+				intersection.add(requiredAuthory);
 			}else{
 			}
 		}
         
 
-        return union;
+        return intersection;
     }
 
 
