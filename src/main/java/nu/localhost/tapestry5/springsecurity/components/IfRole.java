@@ -20,14 +20,13 @@ package nu.localhost.tapestry5.springsecurity.components;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.Set;
 
 import org.apache.tapestry5.Block;
 import org.apache.tapestry5.annotations.Parameter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.GrantedAuthorityImpl;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 
@@ -77,7 +76,8 @@ public class IfRole {
 
     private boolean test;
 
-    private Collection<GrantedAuthority> getPrincipalAuthorities() {
+    @SuppressWarnings("unchecked")
+	private Collection<GrantedAuthority> getPrincipalAuthorities() {
         Authentication currentUser = null;
         currentUser = SecurityContextHolder.getContext().getAuthentication();
 
@@ -124,7 +124,7 @@ public class IfRole {
             role = StringUtils.replace(role, "\n", "");
             role = StringUtils.replace(role, "\f", "");
 
-            requiredAuthorities.add(new GrantedAuthorityImpl(role));
+            requiredAuthorities.add(new SimpleGrantedAuthority(role));
         }
         return requiredAuthorities;
     }
@@ -171,38 +171,18 @@ public class IfRole {
     private Collection<GrantedAuthority> retainAll(final Collection<GrantedAuthority> granted, final Collection<GrantedAuthority> required) {
     	Collection<GrantedAuthority> grantedRoles = authoritiesToRoles(granted);
     	Collection<GrantedAuthority> requiredRoles = authoritiesToRoles(required);
-        grantedRoles.retainAll(requiredRoles);
+    	ArrayList<GrantedAuthority> union = new ArrayList<GrantedAuthority>();
+    	for (GrantedAuthority requiredAuthory : requiredRoles) {
+			if(grantedRoles.contains(requiredAuthory)){
+				union.add(requiredAuthory);
+			}else{
+			}
+		}
+        
 
-        return rolesToAuthorities(grantedRoles, granted);
+        return union;
     }
 
-    /**
-     * @param grantedRoles
-     * @param granted
-     * @return a Set of Authorities corresponding to the roles in the grantedRoles
-     * that are also in the granted Set of Authorities
-     */
-    private Collection<GrantedAuthority> rolesToAuthorities(Collection<GrantedAuthority> grantedRoles, Collection<GrantedAuthority> granted) {
-    	Collection<GrantedAuthority> target = new ArrayList<GrantedAuthority>();
-
-    	final Iterator<GrantedAuthority> iterator = grantedRoles.iterator();
-        while ( iterator.hasNext()) {
-        	
-            String role = iterator.next().getAuthority();
-            
-            final Iterator<GrantedAuthority> grantedIterator = granted.iterator();
-            while ( grantedIterator.hasNext()) {
-                GrantedAuthority authority = (GrantedAuthority) grantedIterator.next();
-
-                if (authority.getAuthority().equals(role)) {
-                    target.add(authority);
-                    break;
-                }
-            }
-        }
-
-        return target;
-    }
 
     /**
      * @return false as the default.  Returns true if all non-null role expressions are 
@@ -210,6 +190,7 @@ public class IfRole {
      * the conditions are effectively AND'd 
      */
     private boolean checkPermission() {
+    	boolean returnValue = true;
         if (((null == ifAllGranted) || "".equals(ifAllGranted))
          && ((null == ifAnyGranted) || "".equals(ifAnyGranted))
          && ((null == role) || "".equals(role))
@@ -222,20 +203,20 @@ public class IfRole {
         if ((null != role) && !"".equals(role)) {
         	final Collection<GrantedAuthority> grantedCopy = retainAll(granted, parseAuthoritiesString(role));
             if (grantedCopy.isEmpty()) {
-                return false;
+                returnValue = false;
             }
         }
 
         if ((null != ifNotGranted) && !"".equals(ifNotGranted)) {
         	final Collection<GrantedAuthority> grantedCopy = retainAll(granted, parseAuthoritiesString(ifNotGranted));
             if (!grantedCopy.isEmpty()) {
-                return false;
+                returnValue = false;
             }
         }
 
         if ((null != ifAllGranted) && !"".equals(ifAllGranted)) {
             if (!granted.containsAll(parseAuthoritiesString(ifAllGranted))) {
-                return false;
+                returnValue = false;
             } 
         }
 
@@ -243,11 +224,11 @@ public class IfRole {
         	final Collection<GrantedAuthority> grantedCopy = retainAll(granted, parseAuthoritiesString(ifAnyGranted));
 
             if (grantedCopy.isEmpty()) {
-                return false;
+                returnValue = false;
             }
         }
 
-        return true;
+        return returnValue;
     }
 
 

@@ -63,7 +63,7 @@ public class StaticSecurityChecker extends AbstractSecurityInterceptor
      * 
      * @return secured object class.
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public final Class getSecureObjectClass() {
         return ConfigAttributeHolder.class;
     }

@@ -40,7 +40,6 @@ public class LoggedInTest extends TestCase {
         
         EasyMock.expect(MockFactory.getInstance().getMockedServletRequest().getUserPrincipal()).andReturn(new Principal() {
 
-			@Override
 			public String getName() {
 				return "User1";
 			}}).times(2);

@@ -35,7 +35,6 @@ public class TestModule {
         
     	RequestFilter filter = new RequestFilter() {
     		
-    		@Override
     		public boolean service(Request request, Response response,
     				RequestHandler handler) throws IOException {
     		
